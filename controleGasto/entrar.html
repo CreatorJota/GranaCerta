@@ -1,0 +1,367 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Login • GranaCerta</title>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="./img/favicon.png?v=1" />
+  <link rel="shortcut icon" href="./img/favicon.png?v=1" />
+
+  <!--
+    Tela de login (HTML + CSS + JS puro)
+    - Visual consistente com o sistema (reutiliza `css/estilo.css` do projeto)
+    - Login com Supabase
+    - Opção "Esqueci minha senha" (envia link e redireciona para `redefinir-senha.html`)
+  -->
+
+  <!-- Mantém exatamente o mesmo estilo do sistema atual -->
+  <link rel="stylesheet" href="css/estilo.css" />
+
+  <style>
+    /* Somente layout/posicionamento desta página (sem mudar o tema do sistema) */
+    body {
+      display: grid;
+      place-items: center;
+      min-height: 100vh;
+      min-height: 100svh;
+    }
+
+    .login-wrap {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .login-card h2 {
+      font-size: 18px;
+      margin-bottom: 14px;
+    }
+
+    .login-form {
+      display: grid;
+      gap: 12px;
+    }
+
+    .login-actions {
+      display: grid;
+      gap: 10px;
+      margin-top: 6px;
+    }
+
+    .btn--block {
+      width: 100%;
+    }
+
+    .btn-link {
+      border: 0;
+      background: transparent;
+      color: var(--muted);
+      cursor: pointer;
+      padding: 8px 10px;
+      font-weight: 600;
+    }
+
+    .btn-link:hover {
+      color: var(--text);
+      text-decoration: underline;
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, 0.45);
+      border-top-color: rgba(255, 255, 255, 0.95);
+      display: inline-block;
+      animation: spin 0.85s linear infinite;
+      margin-right: 8px;
+      vertical-align: -2px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="login-wrap">
+    <section class="card login-card" aria-live="polite">
+      <!-- Painel: LOGIN -->
+      <div id="panelLogin">
+        <h2>Entrar</h2>
+
+        <!-- Mensagens de erro/sucesso (LOGIN) -->
+        <div id="msgLogin" class="msg" role="status" style="display:none"></div>
+
+        <form id="formLogin" class="login-form" novalidate>
+          <label class="field">
+            <span>Email</span>
+            <input id="email" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" required />
+          </label>
+
+          <label class="field">
+            <span>Senha</span>
+            <input id="senha" type="password" placeholder="Sua senha" autocomplete="current-password" required />
+          </label>
+
+          <div class="login-actions">
+            <button id="btnLogin" class="btn btn--block" type="submit">Entrar</button>
+            <button id="btnReset" class="btn-link" type="button">Esqueceu a senha?</button>
+          </div>
+
+          <div class="divider" role="separator" aria-label="divisor"></div>
+
+          <button id="btnGoSignup" class="btn btn--ghost btn--block" type="button">Criar conta</button>
+          <p class="foot">Controle seus gastos com praticidade.</p>
+        </form>
+      </div>
+
+      <!-- Painel: CADASTRO -->
+      <div id="panelSignup" style="display:none">
+        <h2>Criar conta</h2>
+
+        <!-- Mensagens de erro/sucesso (CADASTRO) -->
+        <div id="msgSignup" class="msg" role="status" style="display:none"></div>
+
+        <form id="formSignup" class="login-form" novalidate>
+          <label class="field">
+            <span>Email</span>
+            <input id="signupEmail" type="email" placeholder="seuemail@exemplo.com" autocomplete="email" required />
+          </label>
+
+          <label class="field">
+            <span>Senha</span>
+            <input id="signupSenha" type="password" placeholder="Mínimo 6 caracteres" minlength="6" autocomplete="new-password" required />
+          </label>
+
+          <div class="login-actions">
+            <button id="btnSignup" class="btn btn--block" type="submit">Criar conta</button>
+            <button id="btnBackLogin" class="btn-link" type="button">Voltar para entrar</button>
+          </div>
+
+          <p class="foot">Você pode precisar confirmar seu email.</p>
+        </form>
+      </div>
+    </section>
+  </main>
+
+  <script type="module">
+    // Supabase JS via CDN (ESM)
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+    import { SUPABASE_ANON_KEY, SUPABASE_URL } from './js/config.js'
+
+    // Mesmos dados já usados no seu projeto
+    const supabase = createClient(
+      SUPABASE_URL,
+      SUPABASE_ANON_KEY
+    )
+
+    // Para onde ir após login (página principal do sistema)
+    const APP_URL = './index.html'
+
+    // Elementos
+    const panelLogin = document.getElementById('panelLogin')
+    const panelSignup = document.getElementById('panelSignup')
+
+    const formLogin = document.getElementById('formLogin')
+    const formSignup = document.getElementById('formSignup')
+
+    const emailEl = document.getElementById('email')
+    const senhaEl = document.getElementById('senha')
+    const btnLogin = document.getElementById('btnLogin')
+    const btnReset = document.getElementById('btnReset')
+    const btnGoSignup = document.getElementById('btnGoSignup')
+    const btnBackLogin = document.getElementById('btnBackLogin')
+
+    const signupEmailEl = document.getElementById('signupEmail')
+    const signupSenhaEl = document.getElementById('signupSenha')
+    const btnSignup = document.getElementById('btnSignup')
+
+    const msgLogin = document.getElementById('msgLogin')
+    const msgSignup = document.getElementById('msgSignup')
+
+    function setMessage(target, text, type) {
+      const el = target === 'signup' ? msgSignup : msgLogin
+      if (!el) return
+
+      el.className = 'msg'
+      el.textContent = ''
+
+      if (!text) {
+        el.style.display = 'none'
+        return
+      }
+
+      el.style.display = 'block'
+      el.textContent = text
+
+      if (type === 'error') el.classList.add('msg--error')
+      if (type === 'success') el.classList.add('msg--success')
+    }
+
+    function setLoading(isLoading) {
+      btnLogin.disabled = isLoading
+      btnReset.disabled = isLoading
+      btnGoSignup.disabled = isLoading
+      emailEl.disabled = isLoading
+      senhaEl.disabled = isLoading
+
+      btnSignup.disabled = isLoading
+      btnBackLogin.disabled = isLoading
+      signupEmailEl.disabled = isLoading
+      signupSenhaEl.disabled = isLoading
+
+      if (isLoading) {
+        btnLogin.innerHTML = '<span class="spinner" aria-hidden="true"></span>Entrando...'
+      } else {
+        btnLogin.textContent = 'Entrar'
+      }
+    }
+
+    function showSignup() {
+      panelLogin.style.display = 'none'
+      panelSignup.style.display = 'block'
+      setMessage('login', '', null)
+      setMessage('signup', '', null)
+      signupEmailEl.focus()
+    }
+
+    function showLogin() {
+      panelSignup.style.display = 'none'
+      panelLogin.style.display = 'block'
+      setMessage('signup', '', null)
+      emailEl.focus()
+    }
+
+    function validateLogin(email, senha) {
+      if (!email) return 'Informe seu email.'
+      if (!senha) return 'Informe sua senha.'
+      return ''
+    }
+
+    formLogin.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      setMessage('login', '', null)
+
+      const email = String(emailEl.value || '').trim()
+      const senha = String(senhaEl.value || '')
+
+      const errorText = validateLogin(email, senha)
+      if (errorText) {
+        setMessage('login', errorText, 'error')
+        return
+      }
+
+      try {
+        setLoading(true)
+
+        const { error } = await supabase.auth.signInWithPassword({
+          email,
+          password: senha
+        })
+
+        if (error) {
+          setMessage('login', error.message || 'Erro no login.', 'error')
+          return
+        }
+
+        setMessage('login', 'Logado com sucesso! Redirecionando...', 'success')
+        setTimeout(() => {
+          window.location.href = APP_URL
+        }, 800)
+      } finally {
+        setLoading(false)
+      }
+    })
+
+    btnReset.addEventListener('click', async () => {
+      setMessage('login', '', null)
+
+      const email = String(emailEl.value || '').trim()
+      if (!email) {
+        setMessage('login', 'Digite seu email para receber o link de redefinição.', 'error')
+        return
+      }
+
+      try {
+        setLoading(true)
+
+        // Esta URL precisa estar permitida no Supabase: Auth -> URL Configuration -> Redirect URLs
+        const redirectTo = new URL('./redefinir-senha.html', window.location.href).href
+
+        const { error } = await supabase.auth.resetPasswordForEmail(email, { redirectTo })
+        if (error) {
+          setMessage('login', error.message || 'Não foi possível enviar o link. Tente novamente.', 'error')
+          return
+        }
+
+        // Mensagem neutra para não expor se o email existe
+        setMessage('login', 'Se o email estiver cadastrado, você receberá um link para redefinir a senha.', 'success')
+      } finally {
+        setLoading(false)
+      }
+    })
+
+    function validateSignup(email, senha) {
+      if (!email) return 'Informe seu email.'
+      if (!senha || senha.length < 6) return 'A senha deve ter no mínimo 6 caracteres.'
+      return ''
+    }
+
+    formSignup.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      setMessage('signup', '', null)
+
+      const email = String(signupEmailEl.value || '').trim()
+      const senha = String(signupSenhaEl.value || '')
+
+      const errorText = validateSignup(email, senha)
+      if (errorText) {
+        setMessage('signup', errorText, 'error')
+        return
+      }
+
+      try {
+        setLoading(true)
+        // Reutiliza o texto do botão de login para loading geral
+        btnLogin.innerHTML = '<span class="spinner" aria-hidden="true"></span>Criando...'
+
+        const { data, error } = await supabase.auth.signUp({
+          email,
+          password: senha
+        })
+
+        if (error) {
+          setMessage('signup', error.message || 'Não foi possível criar a conta.', 'error')
+          return
+        }
+
+        // Se o projeto não exigir confirmação por email, pode vir sessão.
+        if (data?.session) {
+          setMessage('signup', 'Conta criada! Redirecionando...', 'success')
+          setTimeout(() => {
+            window.location.href = APP_URL
+          }, 800)
+          return
+        }
+
+        setMessage('signup', 'Conta criada! Verifique seu email para confirmar e depois faça login.', 'success')
+        // Volta para o painel de login e exibe uma mensagem lá também
+        showLogin()
+        setMessage('login', 'Conta criada! Agora entre com seu email e senha.', 'success')
+      } finally {
+        setLoading(false)
+      }
+    })
+
+    // Troca de painéis
+    btnGoSignup.addEventListener('click', showSignup)
+    btnBackLogin.addEventListener('click', showLogin)
+
+    // Foco inicial
+    emailEl.focus()
+  </script>
+</body>
+</html>

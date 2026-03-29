@@ -1,0 +1,103 @@
+<!DOCTYPE html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>GranaCerta</title>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="./img/favicon.png?v=1" />
+  <link rel="shortcut icon" href="./img/favicon.png?v=1" />
+
+  <!-- Estilo moderno (compartilhado com a tela de redefinição) -->
+  <link rel="stylesheet" href="css/estilo.css">
+</head>
+<body>
+
+  <main class="wrap">
+    <header class="page-title">
+      <h1>GranaCerta</h1>
+      <p>Controle de gastos simples e rápido.</p>
+    </header>
+
+    <!-- TOPBAR DO APP -->
+    <section class="card topbar" aria-label="Informações do usuário">
+      <div>
+        <h2>Seu controle</h2>
+        <p class="muted" id="userInfo">Carregando sessão...</p>
+        <p class="muted" id="salarioInfo" style="margin-top:-6px">Salário: —</p>
+      </div>
+      <div class="topbar-actions">
+        <input id="salarioValor" class="input-inline" inputmode="decimal" placeholder="Adicionar salário (ex.: 2500)" />
+        <button id="btnAdicionarSalario" class="btn btn--ghost" type="button">Adicionar</button>
+        <button id="btnLogout" class="btn btn--ghost" type="button">Sair</button>
+      </div>
+    </section>
+
+    <!-- Mensagens do app (adicionar/remover) -->
+    <div id="msgApp" class="msg" role="status" style="display:none"></div>
+
+    <!-- ADICIONAR / REMOVER VALOR -->
+    <section class="card">
+      <h2>Distribuir / gastar</h2>
+      <p class="muted">Distribua seu salário nas categorias (entrada) ou registre um gasto (saída).</p>
+
+      <div class="grid grid--2">
+        <label class="field">
+          <span>Valor</span>
+          <input id="valor" inputmode="decimal" placeholder="Ex.: 25.90">
+        </label>
+
+        <label class="field">
+          <span>Tipo</span>
+          <select id="tipo">
+            <option value="entrada" selected>Entrada (distribuir salário → categoria)</option>
+            <option value="saida">Saída (gasto na categoria)</option>
+          </select>
+        </label>
+
+        <label class="field">
+          <span>Categoria</span>
+          <select id="categoria"></select>
+        </label>
+      </div>
+
+      <div class="actions">
+        <button id="btnAdicionarGasto" class="btn" onclick="adicionarGasto()">Salvar</button>
+      </div>
+
+      <div class="divider"></div>
+
+      <h2>Categorias</h2>
+      <p class="muted">Crie categorias para organizar seus gastos.</p>
+
+      <div class="actions">
+        <input id="novaCategoria" class="input-inline" placeholder="Ex.: Alimentação">
+        <button id="btnCriarCategoria" class="btn btn--ghost" type="button">Criar categoria</button>
+      </div>
+    </section>
+
+    <!-- RESUMO (sem lista de transações) -->
+    <section class="card">
+      <h2>Resumo</h2>
+      <p class="muted">Categorias e saldo atual.</p>
+
+      <div class="actions">
+        <label class="field" style="min-width: 180px">
+          <span>Filtrar por mês</span>
+          <input id="mesFiltro" type="month" />
+        </label>
+        <button id="btnLimparFiltro" class="btn btn--ghost" type="button">Limpar filtro</button>
+      </div>
+
+      <p class="muted" style="margin-bottom:8px">Ativas</p>
+      <div id="categoriasResumoAtivas" class="cats-grid" aria-label="Categorias ativas e saldo"></div>
+
+      <div id="historicoDivider" class="divider"></div>
+      <p id="historicoLabel" class="muted" style="margin-bottom:8px">Histórico</p>
+      <div id="categoriasResumoHistorico" class="cats-grid" aria-label="Categorias do histórico e saldo"></div>
+    </section>
+  </main>
+
+  <script type="module" src="js/aplicacao.js"></script>
+</body>
+</html>

@@ -1,0 +1,399 @@
+<!doctype html>
+<html lang="pt-br">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Redefinir senha</title>
+
+  <link rel="icon" type="image/png" sizes="32x32" href="./img/favicon.png?v=1" />
+  <link rel="shortcut icon" href="./img/favicon.png?v=1" />
+
+  <!--
+    Tela de redefinição de senha (Supabase)
+
+    Como usar:
+    1) Configure no Supabase Auth (Redirect URLs) para apontar para esta página.
+       Ex.: https://seu-dominio.com/controleGasto/redefinir-senha.html
+    2) Abra o link de recuperação enviado por email; ele virá com `#access_token=...` na URL.
+
+    Observação importante:
+    - O token vem no hash (window.location.hash). Nós fazemos `setSession` para autenticar
+      temporariamente o usuário e então executamos `updateUser({ password })`.
+  -->
+
+  <style>
+    /*
+      CSS simples e moderno, responsivo.
+      Sem dependências externas.
+    */
+
+    :root {
+      --bg: #0b1020;
+      --card: rgba(255, 255, 255, 0.08);
+      --border: rgba(255, 255, 255, 0.14);
+      --text: rgba(255, 255, 255, 0.92);
+      --muted: rgba(255, 255, 255, 0.72);
+      --danger: #ff5c74;
+      --success: #37d67a;
+      --primary: #6d6aff;
+      --primary-2: #4d4aff;
+      --focus: rgba(109, 106, 255, 0.35);
+    }
+
+    * { box-sizing: border-box; }
+
+    body {
+      margin: 0;
+      font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+      color: var(--text);
+      min-height: 100vh;
+      min-height: 100svh;
+      display: grid;
+      place-items: center;
+      padding: 24px;
+      background:
+        radial-gradient(1200px 800px at 10% 10%, rgba(109, 106, 255, 0.25), transparent 60%),
+        radial-gradient(900px 700px at 90% 20%, rgba(55, 214, 122, 0.18), transparent 55%),
+        radial-gradient(700px 600px at 50% 100%, rgba(255, 92, 116, 0.12), transparent 60%),
+        var(--bg);
+    }
+
+    .wrap {
+      width: 100%;
+      max-width: 420px;
+    }
+
+    .card {
+      background: var(--card);
+      border: 1px solid var(--border);
+      border-radius: 16px;
+      padding: 22px;
+      backdrop-filter: blur(10px);
+      -webkit-backdrop-filter: blur(10px);
+    }
+
+    @media (max-width: 640px) {
+      body {
+        padding: 16px;
+      }
+
+      .card {
+        padding: 18px;
+      }
+    }
+
+    h1 {
+      font-size: 20px;
+      margin: 0 0 6px;
+      letter-spacing: 0.2px;
+    }
+
+    p {
+      margin: 0 0 18px;
+      color: var(--muted);
+      font-size: 14px;
+      line-height: 1.35;
+    }
+
+    form {
+      display: grid;
+      gap: 12px;
+      margin-top: 12px;
+    }
+
+    label {
+      display: grid;
+      gap: 6px;
+      font-size: 13px;
+      color: var(--muted);
+    }
+
+    input {
+      width: 100%;
+      border-radius: 12px;
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.25);
+      padding: 12px 12px;
+      color: var(--text);
+      outline: none;
+    }
+
+    input:focus {
+      border-color: rgba(109, 106, 255, 0.7);
+      box-shadow: 0 0 0 4px var(--focus);
+    }
+
+    button {
+      width: 100%;
+      border: 0;
+      border-radius: 12px;
+      padding: 12px 14px;
+      font-weight: 650;
+      letter-spacing: 0.2px;
+      color: white;
+      background: linear-gradient(180deg, var(--primary), var(--primary-2));
+      cursor: pointer;
+      transition: transform 0.05s ease, filter 0.15s ease;
+    }
+
+    button:hover { filter: brightness(1.05); }
+    button:active { transform: translateY(1px); }
+
+    button:disabled {
+      cursor: not-allowed;
+      filter: grayscale(0.2) brightness(0.85);
+      opacity: 0.9;
+    }
+
+    .msg {
+      margin-top: 12px;
+      border-radius: 12px;
+      padding: 10px 12px;
+      border: 1px solid var(--border);
+      background: rgba(0, 0, 0, 0.22);
+      font-size: 13px;
+      line-height: 1.35;
+      display: none;
+    }
+
+    .msg--error {
+      display: block;
+      border-color: rgba(255, 92, 116, 0.35);
+      background: rgba(255, 92, 116, 0.12);
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .msg--success {
+      display: block;
+      border-color: rgba(55, 214, 122, 0.35);
+      background: rgba(55, 214, 122, 0.12);
+      color: rgba(255, 255, 255, 0.95);
+    }
+
+    .foot {
+      margin-top: 12px;
+      text-align: center;
+      color: rgba(255, 255, 255, 0.55);
+      font-size: 12px;
+    }
+
+    .spinner {
+      width: 14px;
+      height: 14px;
+      border-radius: 999px;
+      border: 2px solid rgba(255, 255, 255, 0.45);
+      border-top-color: rgba(255, 255, 255, 0.95);
+      display: inline-block;
+      animation: spin 0.85s linear infinite;
+      margin-right: 8px;
+      vertical-align: -2px;
+    }
+
+    @keyframes spin {
+      to { transform: rotate(360deg); }
+    }
+  </style>
+</head>
+
+<body>
+  <main class="wrap">
+    <section class="card" aria-live="polite">
+      <h1>Redefinir senha</h1>
+      <p>Crie uma nova senha para sua conta.</p>
+
+      <!-- Mensagens (erro/sucesso) -->
+      <div id="msg" class="msg" role="status"></div>
+
+      <!-- Formulário -->
+      <form id="form" novalidate>
+        <label>
+          Nova senha
+          <input
+            id="senha"
+            type="password"
+            placeholder="Mínimo 6 caracteres"
+            minlength="6"
+            autocomplete="new-password"
+            required
+          />
+        </label>
+
+        <label>
+          Confirmar senha
+          <input
+            id="confirmar"
+            type="password"
+            placeholder="Repita a senha"
+            minlength="6"
+            autocomplete="new-password"
+            required
+          />
+        </label>
+
+        <button id="btn" type="submit">
+          Redefinir senha
+        </button>
+      </form>
+
+      <div class="foot" id="hint"></div>
+    </section>
+  </main>
+
+  <script type="module">
+    /*
+      JS puro + Supabase via CDN (ESM).
+      Requisitos atendidos:
+      - Detecta access_token no window.location.hash
+      - Valida senha mínima e confirmação
+      - Mostra mensagens de erro/sucesso
+      - Loading e botão desabilitado durante envio
+      - Chama supabase.auth.updateUser({ password })
+    */
+
+    import { createClient } from 'https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2/+esm'
+
+    import { SUPABASE_ANON_KEY, SUPABASE_URL } from './js/config.js'
+
+    // Para onde redirecionar após sucesso (tela de login)
+    // Nesta base, `index.html` já tem login no topo.
+    const LOGIN_URL = './entrar.html'
+
+    const supabase = createClient(SUPABASE_URL, SUPABASE_ANON_KEY)
+
+    // === ELEMENTOS ===
+    const form = document.getElementById('form')
+    const senhaInput = document.getElementById('senha')
+    const confirmarInput = document.getElementById('confirmar')
+    const btn = document.getElementById('btn')
+    const msg = document.getElementById('msg')
+    const hint = document.getElementById('hint')
+
+    function setMessage(text, type) {
+      // type: 'error' | 'success' | null
+      msg.className = 'msg'
+      msg.textContent = ''
+
+      if (!text) {
+        msg.style.display = 'none'
+        return
+      }
+
+      msg.style.display = 'block'
+      msg.textContent = text
+
+      if (type === 'error') msg.classList.add('msg--error')
+      if (type === 'success') msg.classList.add('msg--success')
+    }
+
+    function setLoading(isLoading) {
+      btn.disabled = isLoading
+      senhaInput.disabled = isLoading
+      confirmarInput.disabled = isLoading
+
+      if (isLoading) {
+        btn.innerHTML = '<span class="spinner" aria-hidden="true"></span>Redefinindo...'
+      } else {
+        btn.textContent = 'Redefinir senha'
+      }
+    }
+
+    function parseHashParams(hash) {
+      // hash vem no formato: "#access_token=...&refresh_token=...&type=recovery"
+      const raw = (hash || '').startsWith('#') ? hash.slice(1) : (hash || '')
+      const params = new URLSearchParams(raw)
+
+      return {
+        access_token: params.get('access_token') || '',
+        refresh_token: params.get('refresh_token') || ''
+      }
+    }
+
+    async function bootstrapSessionFromUrl() {
+      // 1) Lê tokens do hash
+      const { access_token, refresh_token } = parseHashParams(window.location.hash)
+
+      // 2) Se não tiver token, link inválido/expirado
+      if (!access_token) {
+        setMessage('Link inválido ou expirado', 'error')
+        form.style.display = 'none'
+        hint.textContent = 'Solicite um novo link de redefinição e tente novamente.'
+        return false
+      }
+
+      // 3) Cria sessão temporária para permitir updateUser
+      const { error } = await supabase.auth.setSession({
+        access_token,
+        refresh_token
+      })
+
+      if (error) {
+        setMessage('Link inválido ou expirado', 'error')
+        form.style.display = 'none'
+        hint.textContent = 'Solicite um novo link de redefinição e tente novamente.'
+        return false
+      }
+
+      // 4) Remove tokens da barra de endereço por segurança (não afeta a sessão)
+      // Mantém o caminho atual e querystring, remove o hash.
+      history.replaceState(null, '', window.location.pathname + window.location.search)
+
+      return true
+    }
+
+    function validatePasswords(novaSenha, confirmarSenha) {
+      if (!novaSenha || novaSenha.length < 6) {
+        return 'A senha deve ter no mínimo 6 caracteres.'
+      }
+      if (novaSenha !== confirmarSenha) {
+        return 'As senhas não conferem.'
+      }
+      return ''
+    }
+
+    // === INIT ===
+    const sessionOk = await bootstrapSessionFromUrl()
+    if (sessionOk) {
+      hint.textContent = 'Dica: use uma senha forte (misture letras, números e símbolos).'
+      senhaInput.focus()
+    }
+
+    // === SUBMIT ===
+    form.addEventListener('submit', async (e) => {
+      e.preventDefault()
+      setMessage('', null)
+
+      const novaSenha = String(senhaInput.value || '').trim()
+      const confirmarSenha = String(confirmarInput.value || '').trim()
+
+      const validationError = validatePasswords(novaSenha, confirmarSenha)
+      if (validationError) {
+        setMessage(validationError, 'error')
+        return
+      }
+
+      try {
+        setLoading(true)
+
+        const { error } = await supabase.auth.updateUser({
+          password: novaSenha
+        })
+
+        if (error) {
+          // Erros comuns: sessão inválida/expirada, senha fraca, etc.
+          setMessage(error.message || 'Não foi possível redefinir a senha. Tente novamente.', 'error')
+          return
+        }
+
+        setMessage('Senha redefinida com sucesso! Redirecionando para o login...', 'success')
+
+        // Pequena pausa para o usuário ver a mensagem antes de redirecionar
+        setTimeout(() => {
+          window.location.href = LOGIN_URL
+        }, 1400)
+      } finally {
+        setLoading(false)
+      }
+    })
+  </script>
+</body>
+</html>

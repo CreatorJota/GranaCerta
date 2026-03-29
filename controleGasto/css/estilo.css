@@ -1,0 +1,322 @@
+/*
+	Estilo simples e moderno (dark/glass) usado anteriormente.
+	Mantém visual parecido com `redefinir-senha.html`.
+*/
+
+:root {
+	--bg: #0b1020;
+	--card: rgba(255, 255, 255, 0.08);
+	--border: rgba(255, 255, 255, 0.14);
+	--text: rgba(255, 255, 255, 0.92);
+	--muted: rgba(255, 255, 255, 0.72);
+	--danger: #ff5c74;
+	--success: #37d67a;
+	--primary: #6d6aff;
+	--primary-2: #4d4aff;
+	--focus: rgba(109, 106, 255, 0.35);
+}
+
+* { box-sizing: border-box; }
+
+body {
+	margin: 0;
+	font-family: system-ui, -apple-system, Segoe UI, Roboto, Arial, sans-serif;
+	color: var(--text);
+	min-height: 100vh;
+	min-height: 100svh;
+	padding: 24px;
+	background:
+		radial-gradient(1200px 800px at 10% 10%, rgba(109, 106, 255, 0.25), transparent 60%),
+		radial-gradient(900px 700px at 90% 20%, rgba(55, 214, 122, 0.18), transparent 55%),
+		radial-gradient(700px 600px at 50% 100%, rgba(255, 92, 116, 0.12), transparent 60%),
+		var(--bg);
+}
+
+.wrap {
+	width: 100%;
+	max-width: 980px;
+	margin: 0 auto;
+	display: grid;
+	gap: 14px;
+}
+
+.page-title {
+	padding: 4px 2px;
+}
+
+.page-title h1 {
+	margin: 0 0 6px;
+	font-size: 22px;
+	letter-spacing: 0.2px;
+}
+
+.page-title p {
+	margin: 0;
+	color: var(--muted);
+	font-size: 14px;
+}
+
+.card {
+	background: var(--card);
+	border: 1px solid var(--border);
+	border-radius: 16px;
+	padding: 18px;
+	backdrop-filter: blur(10px);
+	-webkit-backdrop-filter: blur(10px);
+}
+
+.card h2 {
+	margin: 0 0 6px;
+	font-size: 16px;
+}
+
+.muted {
+	margin: 0 0 14px;
+	color: var(--muted);
+	font-size: 13px;
+	line-height: 1.35;
+}
+
+.grid {
+	display: grid;
+	gap: 12px;
+}
+
+@media (min-width: 720px) {
+	.grid--2 {
+		grid-template-columns: 1fr 1fr;
+	}
+}
+
+.field {
+	display: grid;
+	gap: 6px;
+	font-size: 13px;
+	color: var(--muted);
+}
+
+.field span {
+	color: var(--muted);
+}
+
+input, select {
+	width: 100%;
+	border-radius: 12px;
+	border: 1px solid var(--border);
+	background: rgba(0, 0, 0, 0.25);
+	padding: 12px 12px;
+	color: var(--text);
+	outline: none;
+}
+
+input:focus, select:focus {
+	border-color: rgba(109, 106, 255, 0.7);
+	box-shadow: 0 0 0 4px var(--focus);
+}
+
+/* Select de categoria: destaque roxinho */
+#categoria {
+	border-color: rgba(109, 106, 255, 0.35);
+}
+
+/* Quando o usuário abre a lista, alguns browsers aplicam estilo nas options */
+#categoria option {
+	background: var(--bg);
+	color: var(--text);
+}
+
+#categoria option:checked {
+	background: var(--primary);
+	color: #fff;
+}
+
+/* Select de tipo: destaque roxinho */
+#tipo {
+	border-color: rgba(109, 106, 255, 0.35);
+}
+
+#tipo option {
+	background: var(--bg);
+	color: var(--text);
+}
+
+#tipo option:checked {
+	background: var(--primary);
+	color: #fff;
+}
+
+.actions {
+	display: flex;
+	flex-wrap: wrap;
+	gap: 10px;
+	margin-top: 12px;
+}
+
+.btn {
+	border: 0;
+	border-radius: 12px;
+	padding: 12px 14px;
+	font-weight: 650;
+	letter-spacing: 0.2px;
+	color: white;
+	background: linear-gradient(180deg, var(--primary), var(--primary-2));
+	cursor: pointer;
+	transition: transform 0.05s ease, filter 0.15s ease;
+}
+
+.btn:hover { filter: brightness(1.03); }
+.btn:active { transform: translateY(1px); }
+
+.btn:disabled {
+	cursor: not-allowed;
+	filter: grayscale(0.2) brightness(0.85);
+	opacity: 0.9;
+}
+
+.btn--ghost {
+	background: rgba(255, 255, 255, 0.06);
+	border: 1px solid rgba(255, 255, 255, 0.16);
+}
+
+.btn--ghost:hover {
+	filter: none;
+	background: rgba(255, 255, 255, 0.10);
+}
+
+.msg {
+	margin: 10px 0 12px;
+	border-radius: 12px;
+	padding: 10px 12px;
+	border: 1px solid var(--border);
+	background: rgba(0, 0, 0, 0.22);
+	font-size: 13px;
+	line-height: 1.35;
+}
+
+.msg--error {
+	border-color: rgba(255, 92, 116, 0.35);
+	background: rgba(255, 92, 116, 0.12);
+}
+
+.msg--success {
+	border-color: rgba(55, 214, 122, 0.35);
+	background: rgba(55, 214, 122, 0.12);
+}
+
+.foot {
+	margin: 10px 0 0;
+	color: rgba(255, 255, 255, 0.55);
+	font-size: 12px;
+	line-height: 1.35;
+}
+
+/* Quadrados (resumo) de categorias + saldo */
+.cats-grid {
+	margin-top: 12px;
+	display: grid;
+	gap: 10px;
+	grid-template-columns: repeat(auto-fit, minmax(180px, 1fr));
+}
+
+.cat-tile {
+	position: relative;
+	padding: 12px;
+	border-radius: 14px;
+	border: 1px solid rgba(255, 255, 255, 0.12);
+	background: rgba(0, 0, 0, 0.18);
+	display: grid;
+	gap: 6px;
+}
+
+.cat-delete {
+	position: absolute;
+	top: 8px;
+	right: 8px;
+	width: 28px;
+	height: 28px;
+	border-radius: 999px;
+	border: 1px solid rgba(255, 255, 255, 0.16);
+	background: rgba(255, 255, 255, 0.06);
+	color: var(--muted);
+	cursor: pointer;
+	font-weight: 800;
+	line-height: 1;
+}
+
+.cat-delete:hover {
+	background: rgba(255, 255, 255, 0.10);
+	color: var(--text);
+}
+
+.cat-name {
+	font-weight: 650;
+}
+
+.cat-saldo {
+	font-weight: 750;
+	letter-spacing: 0.2px;
+}
+
+.cat-saldo--pos { color: var(--success); }
+.cat-saldo--neg { color: var(--danger); }
+
+.cat-meta {
+	color: var(--muted);
+	font-size: 12px;
+}
+
+/* App topbar */
+.topbar {
+	display: flex;
+	align-items: center;
+	justify-content: space-between;
+	gap: 12px;
+}
+
+.topbar-actions {
+	display: flex;
+	gap: 10px;
+	flex-wrap: wrap;
+}
+
+.divider {
+	height: 1px;
+	background: rgba(255, 255, 255, 0.14);
+	margin: 14px 0;
+}
+
+.input-inline {
+	flex: 1;
+	min-width: 220px;
+}
+
+/* Mobile: evita aperto/scroll horizontal */
+@media (max-width: 640px) {
+	body {
+		padding: 16px;
+	}
+
+	.card {
+		padding: 16px;
+	}
+
+	.topbar {
+		flex-direction: column;
+		align-items: stretch;
+	}
+
+	.topbar-actions {
+		width: 100%;
+		flex-direction: column;
+	}
+
+	.input-inline {
+		min-width: 0;
+		width: 100%;
+	}
+
+	.actions {
+		flex-direction: column;
+		align-items: stretch;
+	}
+}
