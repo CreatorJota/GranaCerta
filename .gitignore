@@ -26,8 +26,9 @@ pnpm-debug.log*
 .env
 .env.*
 
-# Config local do Supabase (frontend)
-controleGasto/js/config.js
+# Config do Supabase (frontend)
+# Observação: a ANON KEY é pública e pode ser commitada para hosting estático (Vercel).
+# NUNCA use/commite a SERVICE ROLE KEY.
 
 # --- Node / Frontend build (caso use no futuro) ---
 node_modules/

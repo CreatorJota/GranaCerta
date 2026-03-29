@@ -14,7 +14,7 @@ Controle de gastos simples por **categorias**, com **login via Supabase** e **hi
 
 ## Estrutura do projeto
 
-Tudo fica dentro da pasta `controleGasto/`:
+Arquivos principais na raiz:
 
 - `index.html` — app (protegido: se não estiver logado, vai para `entrar.html`)
 - `entrar.html` — login + cadastro
@@ -22,6 +22,7 @@ Tudo fica dentro da pasta `controleGasto/`:
 - `css/estilo.css` — estilos
 - `js/aplicacao.js` — lógica do app
 - `js/config.exemplo.js` — modelo para copiar
+- `js/config.js` — credenciais do Supabase (ANON)
 - `img/favicon.png` — ícone da aba
 
 ## Como rodar
@@ -30,7 +31,7 @@ Tudo fica dentro da pasta `controleGasto/`:
 
 2) Configure o Supabase (obrigatório)
 
-- Copie `controleGasto/js/config.exemplo.js` para `controleGasto/js/config.js`
+- Copie `js/config.exemplo.js` para `js/config.js`
 - Preencha com:
   - `SUPABASE_URL`
   - `SUPABASE_ANON_KEY`
